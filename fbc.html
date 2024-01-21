@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uno Game</title>
+</head>
+<body>
+  <script>
+    class UnoGame {
+  constructor() {
+    this.players = [];
+    this.currentPlayerIndex = 0;
+    this.drawPile = [];
+    this.discardPile = [];
+  }
+
+  initializeGame() {
+    // إعداد اللعبة
+    this.players.push(new UnoPlayer("Player 1"));
+    this.players.push(new UnoPlayer("Player 2"));
+    this.players.push(new UnoPlayer("Player 3"));
+    this.players.push(new UnoPlayer("Player 4"));
+
+    // تعبئة الأوراق وخلطها
+    const allCards = this.generateAllCards();
+    this.shuffleCards(allCards);
+
+    // توزيع البطاقات على اللاعبين
+    this.players.forEach((player) => {
+      player.hand = allCards.splice(0, 7);
+    });
+
+    // وضع بطاقة أولى في الdiscardPile
+    this.discardPile.push(allCards.shift());
+  }
+
+  generateAllCards() {
+    // إنشاء جميع البطاقات
+    const colors = ['red', 'blue', 'green', 'yellow'];
+    const values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'drawTwo'];
+    const specialCards = ['wild', 'wildDrawFour'];
+
+    const allCards = [];
+    colors.forEach((color) => {
+      values.forEach((value) => {
+        allCards.push(new UnoCard(color, value));
+        if (value !== '0') {
+          allCards.push(new UnoCard(color, value));
+        }
+      });
+    });
+
+    specialCards.forEach((card) => {
+      allCards.push(new UnoCard('wild', card));
+    });
+
+    return allCards;
+  }
+
+  shuffleCards(cards) {
+    // خلط البطاقات
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+  }
+
+  switchPlayer() {
+    // التبديل إلى اللاعب التالي
+    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+  }
+
+  playCard(playerIndex, cardIndex) {
+    // اللعب ببطاقة
+    const currentPlayer = this.players[playerIndex];
+    const selectedCard = currentPlayer.hand[cardIndex];
+
+    if (this.isValidMove(selectedCard)) {
+      // قم بإلعب البطاقة وقم بتحديث الdiscardPile
+      currentPlayer.hand.splice(cardIndex, 1);
+      this.discardPile.push(selectedCard);
+
+      // التبديل إلى اللاعب التالي
+      this.switchPlayer();
+    } else {
+      console.log("اللعبة غير صالحة");
+    }
+  }
+
+  isValidMove(card) {
+    // قواعد التحقق من صحة اللعبة، يمكنك تعديلها بحسب قواعد اللعبة الخاصة بك
+    const topCard = this.discardPile[this.discardPile.length - 1];
+
+    return card.color === topCard.color || card.value === topCard.value;
+  }
+}
+
+class UnoPlayer {
+  constructor(name) {
+    this.name = name;
+    this.hand = [];
+  }
+}
+
+class UnoCard {
+  constructor(color, value) {
+    this.color = color;
+    this.value = value;
+  }
+}
+
+// مثال على كيفية استخدام اللعبة
+const unoGame = new UnoGame();
+unoGame.initializeGame();
+
+  </script>
+</body>
+</html>
